@@ -1,0 +1,1313 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Google Health MCP Server</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;500;600;700;800&family=JetBrains+Mono:ital,wght@0,300;0,400;0,500;1,300&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg: #f5f4f0;
+  --ink: #0f0f0f;
+  --ink2: #2a2a2a;
+  --muted: #7a7a7a;
+  --border: #d8d6cf;
+  --surface: #ffffff;
+  --surface2: #edecea;
+  --red: #c0392b;
+  --red-soft: #fdf0ef;
+  --green: #1a7a4a;
+  --green-soft: #edf7f2;
+  --blue: #1a4fa0;
+  --blue-soft: #eef2fb;
+  --amber: #b45309;
+  --amber-soft: #fef7ed;
+  --accent: #c0392b;
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+html { scroll-behavior: smooth; }
+
+body {
+  background: var(--bg);
+  color: var(--ink);
+  font-family: 'Syne', sans-serif;
+  font-size: 15px;
+  line-height: 1.65;
+  overflow-x: hidden;
+}
+
+/* ── Nav ── */
+nav {
+  position: fixed;
+  top: 0; left: 0; right: 0;
+  z-index: 100;
+  background: rgba(245,244,240,0.92);
+  backdrop-filter: blur(12px);
+  border-bottom: 1px solid var(--border);
+  padding: 0 40px;
+  height: 56px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.nav-logo {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--ink);
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  text-decoration: none;
+}
+
+.logo-dot {
+  width: 8px; height: 8px;
+  background: var(--red);
+  border-radius: 50%;
+  animation: breathe 3s ease-in-out infinite;
+}
+
+@keyframes breathe {
+  0%,100% { transform: scale(1); opacity: 1; }
+  50%      { transform: scale(1.4); opacity: 0.7; }
+}
+
+.nav-links {
+  display: flex;
+  align-items: center;
+  gap: 32px;
+  list-style: none;
+}
+
+.nav-links a {
+  text-decoration: none;
+  color: var(--muted);
+  font-size: 13px;
+  font-weight: 500;
+  letter-spacing: 0.02em;
+  transition: color 0.2s;
+}
+
+.nav-links a:hover { color: var(--ink); }
+
+.nav-cta {
+  padding: 7px 18px;
+  background: var(--ink);
+  color: white !important;
+  border-radius: 6px;
+  font-size: 12px !important;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+}
+
+.nav-cta:hover { background: var(--red) !important; color: white !important; }
+
+/* ── Hero ── */
+.hero {
+  padding: 140px 40px 80px;
+  max-width: 1200px;
+  margin: 0 auto;
+  position: relative;
+}
+
+.hero-eyebrow {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 11px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--muted);
+  margin-bottom: 28px;
+  padding: 6px 14px;
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  background: var(--surface);
+}
+
+.hero-title {
+  font-size: clamp(40px, 6vw, 80px);
+  font-weight: 800;
+  letter-spacing: -2px;
+  line-height: 1;
+  margin-bottom: 8px;
+  max-width: 800px;
+}
+
+.hero-title .line2 {
+  color: var(--red);
+}
+
+.hero-subtitle {
+  font-size: 18px;
+  font-weight: 400;
+  color: var(--muted);
+  max-width: 560px;
+  margin-top: 20px;
+  margin-bottom: 40px;
+  line-height: 1.6;
+}
+
+.hero-actions {
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+  margin-bottom: 64px;
+}
+
+.btn-primary {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 13px 28px;
+  background: var(--ink);
+  color: white;
+  text-decoration: none;
+  font-weight: 600;
+  font-size: 14px;
+  border-radius: 6px;
+  letter-spacing: 0.01em;
+  transition: all 0.2s;
+}
+
+.btn-primary:hover { background: var(--red); transform: translateY(-1px); }
+
+.btn-secondary {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 13px 28px;
+  background: transparent;
+  color: var(--ink);
+  text-decoration: none;
+  font-weight: 600;
+  font-size: 14px;
+  border: 1.5px solid var(--border);
+  border-radius: 6px;
+  transition: all 0.2s;
+}
+
+.btn-secondary:hover { border-color: var(--ink); background: var(--surface); transform: translateY(-1px); }
+
+/* Stats bar */
+.stats-bar {
+  display: flex;
+  gap: 0;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  overflow: hidden;
+  background: var(--surface);
+  max-width: 700px;
+}
+
+.stat-item {
+  flex: 1;
+  padding: 20px 24px;
+  border-right: 1px solid var(--border);
+}
+
+.stat-item:last-child { border-right: none; }
+
+.stat-num {
+  font-size: 28px;
+  font-weight: 800;
+  letter-spacing: -1px;
+  color: var(--ink);
+  line-height: 1;
+  margin-bottom: 4px;
+}
+
+.stat-label {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 10px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+
+/* ── Pipeline section ── */
+section {
+  padding: 80px 40px;
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.section-header {
+  display: flex;
+  align-items: baseline;
+  gap: 16px;
+  margin-bottom: 48px;
+  border-bottom: 1px solid var(--border);
+  padding-bottom: 20px;
+}
+
+.section-num {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 11px;
+  color: var(--muted);
+  letter-spacing: 0.1em;
+}
+
+.section-title {
+  font-size: 26px;
+  font-weight: 700;
+  letter-spacing: -0.5px;
+}
+
+/* ── Pipeline flow ── */
+.pipeline {
+  display: grid;
+  grid-template-columns: 1fr 40px 1fr 40px 1fr 40px 1fr;
+  align-items: center;
+  gap: 0;
+  margin-bottom: 48px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 32px;
+}
+
+.pipe-node {
+  text-align: center;
+  padding: 16px 8px;
+}
+
+.pipe-icon {
+  width: 52px;
+  height: 52px;
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 22px;
+  margin: 0 auto 10px;
+}
+
+.pipe-name {
+  font-weight: 700;
+  font-size: 13px;
+  letter-spacing: -0.2px;
+  margin-bottom: 3px;
+}
+
+.pipe-tech {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 9px;
+  color: var(--muted);
+  letter-spacing: 0.05em;
+}
+
+.pipe-arrow {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--muted);
+  font-size: 20px;
+}
+
+/* ── Feature grid ── */
+.features-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 1px;
+  background: var(--border);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  overflow: hidden;
+}
+
+.feature-card {
+  background: var(--surface);
+  padding: 28px;
+  transition: background 0.2s;
+}
+
+.feature-card:hover { background: var(--surface2); }
+
+.feature-tag {
+  display: inline-block;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 9px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  padding: 3px 8px;
+  border-radius: 3px;
+  margin-bottom: 14px;
+  font-weight: 500;
+}
+
+.tag-red    { background: var(--red-soft);   color: var(--red); }
+.tag-green  { background: var(--green-soft); color: var(--green); }
+.tag-blue   { background: var(--blue-soft);  color: var(--blue); }
+.tag-amber  { background: var(--amber-soft); color: var(--amber); }
+
+.feature-title {
+  font-size: 16px;
+  font-weight: 700;
+  letter-spacing: -0.3px;
+  margin-bottom: 8px;
+}
+
+.feature-desc {
+  font-size: 13px;
+  color: var(--muted);
+  line-height: 1.6;
+}
+
+/* ── Tools grid ── */
+.tools-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 8px;
+}
+
+.tool-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 16px;
+  transition: all 0.2s;
+  cursor: default;
+}
+
+.tool-card:hover {
+  border-color: var(--ink);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 16px rgba(0,0,0,0.08);
+}
+
+.tool-name {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 11px;
+  font-weight: 500;
+  color: var(--ink);
+  margin-bottom: 4px;
+}
+
+.tool-desc {
+  font-size: 11px;
+  color: var(--muted);
+  line-height: 1.4;
+}
+
+.tool-category {
+  display: inline-block;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 8px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  padding: 2px 6px;
+  border-radius: 3px;
+  margin-bottom: 8px;
+}
+
+/* ── Code block ── */
+.code-wrapper {
+  background: var(--ink);
+  border-radius: 10px;
+  overflow: hidden;
+  margin-bottom: 16px;
+}
+
+.code-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 12px 20px;
+  border-bottom: 1px solid #2a2a2a;
+}
+
+.code-dots { display: flex; gap: 6px; }
+.code-dots span {
+  width: 10px; height: 10px;
+  border-radius: 50%;
+}
+.dot-r { background: #ff5f57; }
+.dot-y { background: #febc2e; }
+.dot-g { background: #28c840; }
+
+.code-filename {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 11px;
+  color: #6a6a6a;
+}
+
+pre {
+  padding: 24px;
+  overflow-x: auto;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 12px;
+  line-height: 1.8;
+  color: #c9ccd1;
+}
+
+.kw  { color: #c678dd; }
+.fn  { color: #61afef; }
+.str { color: #98c379; }
+.cm  { color: #5c6370; font-style: italic; }
+.num { color: #d19a66; }
+.dec { color: #e5c07b; }
+
+/* ── OAuth flow ── */
+.oauth-steps {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  overflow: hidden;
+  background: var(--surface);
+}
+
+.oauth-step {
+  display: grid;
+  grid-template-columns: 60px 1fr;
+  border-bottom: 1px solid var(--border);
+  transition: background 0.15s;
+}
+
+.oauth-step:last-child { border-bottom: none; }
+.oauth-step:hover { background: var(--surface2); }
+
+.oauth-step-num {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--muted);
+  border-right: 1px solid var(--border);
+  padding: 20px;
+}
+
+.oauth-step-body {
+  padding: 20px 24px;
+}
+
+.oauth-step-title {
+  font-weight: 700;
+  font-size: 14px;
+  margin-bottom: 4px;
+}
+
+.oauth-step-desc {
+  font-size: 12px;
+  color: var(--muted);
+  font-family: 'JetBrains Mono', monospace;
+}
+
+/* ── Token lifecycle ── */
+.token-lifecycle {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 12px;
+}
+
+.token-card {
+  border: 1.5px solid var(--border);
+  border-radius: 8px;
+  padding: 20px;
+  position: relative;
+  overflow: hidden;
+}
+
+.token-card::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  height: 3px;
+}
+
+.token-fresh::before  { background: var(--green); }
+.token-buffer::before { background: var(--amber); }
+.token-expired::before{ background: var(--red); }
+
+.token-state {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 10px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  font-weight: 500;
+  margin-bottom: 8px;
+}
+
+.token-fresh .token-state  { color: var(--green); }
+.token-buffer .token-state { color: var(--amber); }
+.token-expired .token-state{ color: var(--red); }
+
+.token-title { font-weight: 700; font-size: 15px; margin-bottom: 6px; }
+.token-desc  { font-size: 12px; color: var(--muted); line-height: 1.5; }
+
+/* ── Setup section ── */
+.setup-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 24px;
+}
+
+/* ── Full-width divider section ── */
+.divider-section {
+  border-top: 1px solid var(--border);
+  border-bottom: 1px solid var(--border);
+  background: var(--surface);
+  padding: 40px;
+  margin: 0;
+}
+
+.divider-inner {
+  max-width: 1200px;
+  margin: 0 auto;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 40px;
+}
+
+/* ── Footer ── */
+footer {
+  border-top: 1px solid var(--border);
+  background: var(--ink);
+  color: #6a6a6a;
+  padding: 40px;
+}
+
+.footer-inner {
+  max-width: 1200px;
+  margin: 0 auto;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.footer-logo {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 13px;
+  color: #ffffff;
+}
+
+.footer-links {
+  display: flex;
+  gap: 24px;
+}
+
+.footer-links a {
+  color: #6a6a6a;
+  text-decoration: none;
+  font-size: 12px;
+  font-family: 'JetBrains Mono', monospace;
+  transition: color 0.2s;
+}
+
+.footer-links a:hover { color: white; }
+
+/* ── Utility ── */
+code {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 12px;
+  background: var(--surface2);
+  border: 1px solid var(--border);
+  padding: 1px 6px;
+  border-radius: 4px;
+  color: var(--red);
+}
+
+.inline-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 10px;
+  padding: 3px 8px;
+  border-radius: 4px;
+  border: 1px solid var(--border);
+  background: var(--surface);
+  color: var(--muted);
+  vertical-align: middle;
+}
+
+/* Animations */
+@keyframes fadeUp {
+  from { opacity: 0; transform: translateY(20px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+.fade-up {
+  animation: fadeUp 0.6s ease forwards;
+  opacity: 0;
+}
+
+.delay-1 { animation-delay: 0.1s; }
+.delay-2 { animation-delay: 0.2s; }
+.delay-3 { animation-delay: 0.3s; }
+.delay-4 { animation-delay: 0.4s; }
+
+@media (max-width: 900px) {
+  .features-grid  { grid-template-columns: 1fr 1fr; }
+  .tools-grid     { grid-template-columns: repeat(2,1fr); }
+  .token-lifecycle{ grid-template-columns: 1fr; }
+  .setup-grid     { grid-template-columns: 1fr; }
+  .pipeline       { grid-template-columns: 1fr; gap: 8px; }
+  .pipe-arrow     { transform: rotate(90deg); }
+  nav             { padding: 0 20px; }
+  .nav-links      { display: none; }
+  .hero, section  { padding-left: 20px; padding-right: 20px; }
+}
+
+@media (max-width: 600px) {
+  .features-grid { grid-template-columns: 1fr; }
+  .tools-grid    { grid-template-columns: 1fr; }
+}
+</style>
+</head>
+<body>
+
+<!-- Nav -->
+<nav>
+  <a href="#" class="nav-logo">
+    <span class="logo-dot"></span>
+    google-health-mcp
+  </a>
+  <ul class="nav-links">
+    <li><a href="#architecture">Architecture</a></li>
+    <li><a href="#tools">Tools</a></li>
+    <li><a href="#oauth">OAuth</a></li>
+    <li><a href="#setup">Setup</a></li>
+    <li><a href="https://github.com" class="nav-cta">GitHub ↗</a></li>
+  </ul>
+</nav>
+
+<!-- Hero -->
+<div class="hero">
+  <div class="hero-eyebrow fade-up">
+    <span>●</span> Model Context Protocol · Streamable HTTP
+  </div>
+  <h1 class="hero-title fade-up delay-1">
+    Google Health<br>
+    <span class="line2">MCP Server</span>
+  </h1>
+  <p class="hero-subtitle fade-up delay-2">
+    A production-ready MCP server that exposes the entire Google Health API as tools for AI agents — with automatic token refresh, CrewAI integration, and zero manual auth management.
+  </p>
+  <div class="hero-actions fade-up delay-3">
+    <a href="https://github.com" class="btn-primary">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2C6.477 2 2 6.484 2 12.017c0 4.425 2.865 8.18 6.839 9.504.5.092.682-.217.682-.483 0-.237-.008-.868-.013-1.703-2.782.605-3.369-1.343-3.369-1.343-.454-1.158-1.11-1.466-1.11-1.466-.908-.62.069-.608.069-.608 1.003.07 1.531 1.032 1.531 1.032.892 1.53 2.341 1.088 2.91.832.092-.647.35-1.088.636-1.338-2.22-.253-4.555-1.113-4.555-4.951 0-1.093.39-1.988 1.029-2.688-.103-.253-.446-1.272.098-2.65 0 0 .84-.27 2.75 1.026A9.564 9.564 0 0112 6.844c.85.004 1.705.115 2.504.337 1.909-1.296 2.747-1.027 2.747-1.027.546 1.379.202 2.398.1 2.651.64.7 1.028 1.595 1.028 2.688 0 3.848-2.339 4.695-4.566 4.92.359.31.678.921.678 1.856 0 1.338-.012 2.419-.012 2.747 0 .268.18.58.688.482A10.019 10.019 0 0022 12.017C22 6.484 17.522 2 12 2z"/></svg>
+      View on GitHub
+    </a>
+    <a href="#setup" class="btn-secondary">
+      Quick Start →
+    </a>
+  </div>
+
+  <div class="stats-bar fade-up delay-4">
+    <div class="stat-item">
+      <div class="stat-num">40+</div>
+      <div class="stat-label">MCP Tools</div>
+    </div>
+    <div class="stat-item">
+      <div class="stat-num">4</div>
+      <div class="stat-label">Health Scopes</div>
+    </div>
+    <!-- <div class="stat-item">
+      <div class="stat-num">~3600s</div>
+      <div class="stat-label">Token TTL</div>
+    </div> -->
+    <div class="stat-item">
+      <div class="stat-num">HTTP</div>
+      <div class="stat-label">Transport</div>
+    </div>
+  </div>
+</div>
+
+<!-- Divider -->
+<div class="divider-section">
+  <div class="divider-inner">
+    <div style="font-size:13px; color: var(--muted); max-width:500px; line-height:1.7">
+      This project bridges the <strong style="color:var(--ink)">Google Health API</strong> and any AI agent framework (CrewAI, LangChain) via the <strong style="color:var(--ink)">Model Context Protocol</strong>. Your agent calls tools like <code>get_steps_daily_rollup</code> or <code>get_sleep</code> — the server handles OAuth, token refresh, and HTTP — transparently.
+    </div>
+    <div style="display:flex; gap:8px; flex-wrap:wrap">
+      <span class="inline-badge">🐍 Python 3.11+</span>
+      <span class="inline-badge">⚡ FastMCP</span>
+      <span class="inline-badge">🤖 CrewAI</span>
+      <span class="inline-badge">🦜 LangChain</span>
+      <span class="inline-badge">🏥 Google Health API</span>
+    </div>
+  </div>
+</div>
+
+<!-- Architecture -->
+<section id="architecture">
+  <div class="section-header">
+    <span class="section-num">01</span>
+    <h2 class="section-title">Architecture</h2>
+  </div>
+
+  <!-- Pipeline -->
+  <div class="pipeline" style="margin-bottom:40px">
+    <div class="pipe-node">
+      <div class="pipe-icon" style="background:#fdf0ef">🤖</div>
+      <div class="pipe-name">AI Agent</div>
+      <div class="pipe-tech">CrewAI / LangChain</div>
+    </div>
+    <div class="pipe-arrow">→</div>
+    <div class="pipe-node">
+      <div class="pipe-icon" style="background:#eef2fb">🔌</div>
+      <div class="pipe-name">MCP Client</div>
+      <div class="pipe-tech">MCPServerAdapter</div>
+    </div>
+    <div class="pipe-arrow">→</div>
+    <div class="pipe-node">
+      <div class="pipe-icon" style="background:#edf7f2">⚙️</div>
+      <div class="pipe-name">MCP Server</div>
+      <div class="pipe-tech">FastMCP · :8000</div>
+    </div>
+    <div class="pipe-arrow">→</div>
+    <div class="pipe-node">
+      <div class="pipe-icon" style="background:#fef7ed">🏥</div>
+      <div class="pipe-name">Google Health</div>
+      <div class="pipe-tech">health.googleapis.com/v4</div>
+    </div>
+  </div>
+
+  <div class="features-grid">
+    <div class="feature-card">
+      <span class="feature-tag tag-green">Token Management</span>
+      <div class="feature-title">Proactive Auto-Refresh</div>
+      <div class="feature-desc">Tokens are refreshed 120 seconds before expiry. No tool call ever hits a live 401. Thread-safe <code>TOKEN_STATE</code> with <code>threading.Lock</code> ensures concurrent safety.</div>
+    </div>
+    <div class="feature-card">
+      <span class="feature-tag tag-blue">Transport</span>
+      <div class="feature-title">Streamable HTTP / SSE</div>
+      <div class="feature-desc">Uses MCP's Streamable HTTP transport at <code>/mcp</code>. A separate <code>/health/token-status</code> endpoint lets clients verify token validity before starting a session.</div>
+    </div>
+    <div class="feature-card">
+      <span class="feature-tag tag-red">OAuth 2.0</span>
+      <div class="feature-title">Full OAuth Flow Built-in</div>
+      <div class="feature-desc">Server exposes <code>/auth/url</code> and <code>/auth/exchange</code> HTTP endpoints. Client opens browser, pastes redirect URL — tokens are stored server-side automatically.</div>
+    </div>
+    <div class="feature-card">
+      <span class="feature-tag tag-amber">Data Scopes</span>
+      <div class="feature-title">4 Google Health Scopes</div>
+      <div class="feature-desc">Activity &amp; fitness, health metrics &amp; measurements, sleep, and nutrition — requested with <code>access_type=offline</code> for long-lived refresh tokens.</div>
+    </div>
+    <div class="feature-card">
+      <span class="feature-tag tag-green">Aggregation</span>
+      <div class="feature-title">Daily Rollups &amp; Custom Ranges</div>
+      <div class="feature-desc">Every data type supports <code>dailyRollUp</code> (civil-day aggregates) and <code>rollUp</code> (arbitrary time ranges) in addition to raw data point listing.</div>
+    </div>
+    <div class="feature-card">
+      <span class="feature-tag tag-blue">Extensibility</span>
+      <div class="feature-title">Generic Passthrough Tools</div>
+      <div class="feature-desc"><code>list_data_points</code>, <code>daily_rollup</code>, and <code>rollup</code> tools accept any data type string — future-proof against new Google Health endpoints.</div>
+    </div>
+  </div>
+</section>
+
+<!-- Token Lifecycle -->
+<section style="padding-top:0">
+  <div class="section-header">
+    <span class="section-num">02</span>
+    <h2 class="section-title">Token Lifecycle</h2>
+  </div>
+
+  <div class="token-lifecycle" style="margin-bottom:32px">
+    <div class="token-card token-fresh">
+      <div class="token-state">✓ Fresh</div>
+      <div class="token-title">expiry &gt; 120s away</div>
+      <div class="token-desc">Token is returned immediately with zero API calls. Fast path in <code>_token()</code> — the common case for most tool calls.</div>
+    </div>
+    <div class="token-card token-buffer">
+      <div class="token-state">⚠ Buffer Window</div>
+      <div class="token-title">0s &lt; expiry ≤ 120s</div>
+      <div class="token-desc">Proactive refresh triggered before expiry hits. The tool call that prompted this never fails — refresh happens inline before returning the token.</div>
+    </div>
+    <div class="token-card token-expired">
+      <div class="token-state">✗ Expired</div>
+      <div class="token-title">expiry ≤ 0s</div>
+      <div class="token-desc">Refresh grant executed using stored <code>refresh_token</code>. If no refresh token exists, raises with clear OAuth instructions. Full re-auth only needed once.</div>
+    </div>
+  </div>
+
+  <div class="code-wrapper">
+    <div class="code-bar">
+      <div class="code-dots"><span class="dot-r"></span><span class="dot-y"></span><span class="dot-g"></span></div>
+      <span class="code-filename">server.py — _token() logic</span>
+      <span></span>
+    </div>
+    <pre><span class="dec">def</span> <span class="fn">_token</span>() -> <span class="fn">str</span>:
+    secs = <span class="fn">_seconds_until_expiry</span>()
+
+    <span class="kw">if</span> secs <span class="kw">is not</span> <span class="num">None</span> <span class="kw">and</span> secs > REFRESH_BUFFER_SECS:
+        <span class="cm"># ✓ Fresh — fast path, no API call needed</span>
+        <span class="kw">return</span> TOKEN_STATE[<span class="str">"access_token"</span>]
+
+    <span class="kw">if</span> secs <span class="kw">is not</span> <span class="num">None</span> <span class="kw">and</span> secs <= <span class="num">0</span>:
+        <span class="fn">_do_refresh</span>()           <span class="cm"># Fully expired → must refresh</span>
+    <span class="kw">elif</span> secs <span class="kw">is</span> <span class="num">None</span>:
+        <span class="kw">if</span> <span class="fn">has_refresh_token</span>():
+            <span class="fn">_do_refresh</span>()       <span class="cm"># Unknown expiry + refresh token → refresh</span>
+    <span class="kw">else</span>:
+        <span class="fn">_do_refresh</span>()           <span class="cm"># Within 120s buffer → proactive refresh</span>
+
+    <span class="kw">return</span> TOKEN_STATE[<span class="str">"access_token"</span>]</pre>
+  </div>
+</section>
+
+<!-- OAuth Flow -->
+<section id="oauth" style="padding-top:0">
+  <div class="section-header">
+    <span class="section-num">03</span>
+    <h2 class="section-title">OAuth Flow</h2>
+  </div>
+
+  <div class="oauth-steps" style="margin-bottom:32px">
+    <div class="oauth-step">
+      <div class="oauth-step-num">01</div>
+      <div class="oauth-step-body">
+        <div class="oauth-step-title">Client checks token validity</div>
+        <div class="oauth-step-desc">GET /health/token-status → { valid: bool, expires_in: int, has_refresh_token: bool }</div>
+      </div>
+    </div>
+    <div class="oauth-step">
+      <div class="oauth-step-num">02</div>
+      <div class="oauth-step-body">
+        <div class="oauth-step-title">If invalid → get authorization URL</div>
+        <div class="oauth-step-desc">GET /auth/url → { url: "https://accounts.google.com/o/oauth2/v2/auth?..." }</div>
+      </div>
+    </div>
+    <div class="oauth-step">
+      <div class="oauth-step-num">03</div>
+      <div class="oauth-step-body">
+        <div class="oauth-step-title">Browser opens, user consents</div>
+        <div class="oauth-step-desc">webbrowser.open(url) — user approves 4 health scopes in Google's consent screen</div>
+      </div>
+    </div>
+    <div class="oauth-step">
+      <div class="oauth-step-num">04</div>
+      <div class="oauth-step-body">
+        <div class="oauth-step-title">User pastes redirect URL</div>
+        <div class="oauth-step-desc">Full redirect URL (or just the code= value) pasted into the terminal prompt</div>
+      </div>
+    </div>
+    <div class="oauth-step">
+      <div class="oauth-step-num">05</div>
+      <div class="oauth-step-body">
+        <div class="oauth-step-title">Server exchanges code for tokens</div>
+        <div class="oauth-step-desc">POST /auth/exchange → extracts code, calls Google Token URL, stores access + refresh tokens in TOKEN_STATE</div>
+      </div>
+    </div>
+    <div class="oauth-step">
+      <div class="oauth-step-num">06</div>
+      <div class="oauth-step-body">
+        <div class="oauth-step-title">All tool calls now work</div>
+        <div class="oauth-step-desc">MCP session starts — agent calls health tools transparently. Auto-refresh runs as needed.</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="code-wrapper">
+    <div class="code-bar">
+      <div class="code-dots"><span class="dot-r"></span><span class="dot-y"></span><span class="dot-g"></span></div>
+      <span class="code-filename">client.py — run_oauth_flow()</span>
+      <span></span>
+    </div>
+    <pre><span class="dec">def</span> <span class="fn">run_oauth_flow</span>():
+    <span class="cm"># 1. Get the auth URL from the server</span>
+    resp = requests.<span class="fn">get</span>(<span class="str">f"{BASE}/auth/url"</span>, timeout=<span class="num">5</span>)
+    url  = resp.<span class="fn">json</span>()[<span class="str">"url"</span>]
+
+    <span class="cm"># 2. Open browser for user consent</span>
+    webbrowser.<span class="fn">open</span>(url)
+    redirect_url = <span class="fn">input</span>(<span class="str">"Paste the full redirect URL here: "</span>)
+
+    <span class="cm"># 3. Exchange code for tokens (server handles extraction)</span>
+    requests.<span class="fn">post</span>(
+        <span class="str">f"{BASE}/auth/exchange"</span>,
+        json={<span class="str">"authorization_code"</span>: redirect_url},
+    )
+    <span class="cm"># Tokens stored in TOKEN_STATE — all tools work now ✓</span></pre>
+  </div>
+</section>
+
+<!-- Tools Reference -->
+<section id="tools" style="padding-top:0">
+  <div class="section-header">
+    <span class="section-num">04</span>
+    <h2 class="section-title">MCP Tools Reference</h2>
+  </div>
+
+  <div style="margin-bottom:20px; display:flex; gap:8px; flex-wrap:wrap">
+    <button onclick="filterTools('all')" id="f-all" style="padding:6px 14px;border:1.5px solid var(--ink);border-radius:5px;background:var(--ink);color:white;font-family:'Syne',sans-serif;font-size:12px;font-weight:600;cursor:pointer">All</button>
+    <button onclick="filterTools('auth')" id="f-auth" style="padding:6px 14px;border:1.5px solid var(--border);border-radius:5px;background:transparent;font-family:'Syne',sans-serif;font-size:12px;font-weight:600;cursor:pointer;color:var(--ink)">OAuth</button>
+    <button onclick="filterTools('activity')" id="f-activity" style="padding:6px 14px;border:1.5px solid var(--border);border-radius:5px;background:transparent;font-family:'Syne',sans-serif;font-size:12px;font-weight:600;cursor:pointer;color:var(--ink)">Activity</button>
+    <button onclick="filterTools('health')" id="f-health" style="padding:6px 14px;border:1.5px solid var(--border);border-radius:5px;background:transparent;font-family:'Syne',sans-serif;font-size:12px;font-weight:600;cursor:pointer;color:var(--ink)">Health Metrics</button>
+    <button onclick="filterTools('sleep')" id="f-sleep" style="padding:6px 14px;border:1.5px solid var(--border);border-radius:5px;background:transparent;font-family:'Syne',sans-serif;font-size:12px;font-weight:600;cursor:pointer;color:var(--ink)">Sleep</button>
+    <button onclick="filterTools('nutrition')" id="f-nutrition" style="padding:6px 14px;border:1.5px solid var(--border);border-radius:5px;background:transparent;font-family:'Syne',sans-serif;font-size:12px;font-weight:600;cursor:pointer;color:var(--ink)">Nutrition</button>
+    <button onclick="filterTools('generic')" id="f-generic" style="padding:6px 14px;border:1.5px solid var(--border);border-radius:5px;background:transparent;font-family:'Syne',sans-serif;font-size:12px;font-weight:600;cursor:pointer;color:var(--ink)">Generic</button>
+  </div>
+
+  <div class="tools-grid" id="tools-grid">
+
+    <!-- OAuth -->
+    <div class="tool-card" data-cat="auth">
+      <span class="tool-category tag-red">OAuth</span>
+      <div class="tool-name">get_authorization_url</div>
+      <div class="tool-desc">Generate Google OAuth 2.0 URL with all health scopes</div>
+    </div>
+    <div class="tool-card" data-cat="auth">
+      <span class="tool-category tag-red">OAuth</span>
+      <div class="tool-name">exchange_code_for_tokens</div>
+      <div class="tool-desc">Exchange auth code or redirect URL for access + refresh tokens</div>
+    </div>
+    <div class="tool-card" data-cat="auth">
+      <span class="tool-category tag-red">OAuth</span>
+      <div class="tool-name">refresh_access_token</div>
+      <div class="tool-desc">Manually trigger refresh grant using stored refresh_token</div>
+    </div>
+    <div class="tool-card" data-cat="auth">
+      <span class="tool-category tag-red">OAuth</span>
+      <div class="tool-name">set_tokens</div>
+      <div class="tool-desc">Inject externally-obtained tokens into server TOKEN_STATE</div>
+    </div>
+
+    <!-- Activity -->
+    <div class="tool-card" data-cat="activity">
+      <span class="tool-category tag-green">Activity</span>
+      <div class="tool-name">get_exercises</div>
+      <div class="tool-desc">List exercise sessions, optionally filtered by start time</div>
+    </div>
+    <div class="tool-card" data-cat="activity">
+      <span class="tool-category tag-green">Activity</span>
+      <div class="tool-name">get_single_exercise</div>
+      <div class="tool-desc">Retrieve one exercise session by data point ID</div>
+    </div>
+    <div class="tool-card" data-cat="activity">
+      <span class="tool-category tag-green">Activity</span>
+      <div class="tool-name">export_exercise_tcx</div>
+      <div class="tool-desc">Export exercise session as TCX (Training Center XML) format</div>
+    </div>
+    <div class="tool-card" data-cat="activity">
+      <span class="tool-category tag-green">Activity</span>
+      <div class="tool-name">get_steps</div>
+      <div class="tool-desc">List intraday step count data points</div>
+    </div>
+    <div class="tool-card" data-cat="activity">
+      <span class="tool-category tag-green">Activity</span>
+      <div class="tool-name">get_steps_daily_rollup</div>
+      <div class="tool-desc">Daily step totals per civil day for a date range</div>
+    </div>
+    <div class="tool-card" data-cat="activity">
+      <span class="tool-category tag-green">Activity</span>
+      <div class="tool-name">get_distance_daily_rollup</div>
+      <div class="tool-desc">Daily distance aggregates (values in millimeters)</div>
+    </div>
+    <div class="tool-card" data-cat="activity">
+      <span class="tool-category tag-green">Activity</span>
+      <div class="tool-name">get_calories_daily_rollup</div>
+      <div class="tool-desc">Daily calorie expenditure totals per civil day</div>
+    </div>
+    <div class="tool-card" data-cat="activity">
+      <span class="tool-category tag-green">Activity</span>
+      <div class="tool-name">get_active_zone_minutes_daily_rollup</div>
+      <div class="tool-desc">Daily active zone minutes aggregated per civil day</div>
+    </div>
+    <div class="tool-card" data-cat="activity">
+      <span class="tool-category tag-green">Activity</span>
+      <div class="tool-name">get_activity_level</div>
+      <div class="tool-desc">Sedentary / light / moderate / vigorous intervals</div>
+    </div>
+    <div class="tool-card" data-cat="activity">
+      <span class="tool-category tag-green">Activity</span>
+      <div class="tool-name">get_floors_daily_rollup</div>
+      <div class="tool-desc">Daily floors climbed — defaults to last 7 days</div>
+    </div>
+    <div class="tool-card" data-cat="activity">
+      <span class="tool-category tag-green">Activity</span>
+      <div class="tool-name">get_daily_vo2_max</div>
+      <div class="tool-desc">Daily VO₂ max estimates</div>
+    </div>
+    <div class="tool-card" data-cat="activity">
+      <span class="tool-category tag-green">Activity</span>
+      <div class="tool-name">get_time_in_heart_rate_zone</div>
+      <div class="tool-desc">Time spent in each heart rate training zone</div>
+    </div>
+
+    <!-- Health Metrics -->
+    <div class="tool-card" data-cat="health">
+      <span class="tool-category tag-blue">Health</span>
+      <div class="tool-name">get_heart_rate</div>
+      <div class="tool-desc">Intraday heart rate samples (beats per minute)</div>
+    </div>
+    <div class="tool-card" data-cat="health">
+      <span class="tool-category tag-blue">Health</span>
+      <div class="tool-name">get_heart_rate_daily_rollup</div>
+      <div class="tool-desc">Daily heart rate statistics — min, max, avg per day</div>
+    </div>
+    <div class="tool-card" data-cat="health">
+      <span class="tool-category tag-blue">Health</span>
+      <div class="tool-name">get_daily_resting_heart_rate</div>
+      <div class="tool-desc">Daily resting heart rate values</div>
+    </div>
+    <div class="tool-card" data-cat="health">
+      <span class="tool-category tag-blue">Health</span>
+      <div class="tool-name">get_heart_rate_variability</div>
+      <div class="tool-desc">Intraday HRV samples</div>
+    </div>
+    <div class="tool-card" data-cat="health">
+      <span class="tool-category tag-blue">Health</span>
+      <div class="tool-name">get_daily_hrv</div>
+      <div class="tool-desc">Daily heart rate variability summaries</div>
+    </div>
+    <div class="tool-card" data-cat="health">
+      <span class="tool-category tag-blue">Health</span>
+      <div class="tool-name">get_oxygen_saturation</div>
+      <div class="tool-desc">Blood oxygen (SpO₂) samples</div>
+    </div>
+    <div class="tool-card" data-cat="health">
+      <span class="tool-category tag-blue">Health</span>
+      <div class="tool-name">get_daily_respiratory_rate</div>
+      <div class="tool-desc">Daily respiratory rate (breaths per minute)</div>
+    </div>
+    <div class="tool-card" data-cat="health">
+      <span class="tool-category tag-blue">Health</span>
+      <div class="tool-name">get_weight</div>
+      <div class="tool-desc">Body weight measurements</div>
+    </div>
+    <div class="tool-card" data-cat="health">
+      <span class="tool-category tag-blue">Health</span>
+      <div class="tool-name">get_weight_daily_rollup</div>
+      <div class="tool-desc">Daily weight statistics aggregated per civil day</div>
+    </div>
+    <div class="tool-card" data-cat="health">
+      <span class="tool-category tag-blue">Health</span>
+      <div class="tool-name">get_body_fat</div>
+      <div class="tool-desc">Body fat percentage measurements</div>
+    </div>
+    <div class="tool-card" data-cat="health">
+      <span class="tool-category tag-blue">Health</span>
+      <div class="tool-name">get_height</div>
+      <div class="tool-desc">Body height measurements</div>
+    </div>
+    <div class="tool-card" data-cat="health">
+      <span class="tool-category tag-blue">Health</span>
+      <div class="tool-name">get_daily_heart_rate_zones</div>
+      <div class="tool-desc">Daily heart rate zone boundary data</div>
+    </div>
+
+    <!-- Sleep -->
+    <div class="tool-card" data-cat="sleep">
+      <span class="tool-category tag-amber">Sleep</span>
+      <div class="tool-name">get_sleep</div>
+      <div class="tool-desc">List all sleep session data points</div>
+    </div>
+    <div class="tool-card" data-cat="sleep">
+      <span class="tool-category tag-amber">Sleep</span>
+      <div class="tool-name">get_single_sleep</div>
+      <div class="tool-desc">Retrieve one sleep session by data point ID</div>
+    </div>
+    <div class="tool-card" data-cat="sleep">
+      <span class="tool-category tag-amber">Sleep</span>
+      <div class="tool-name">get_respiratory_rate_sleep_summary</div>
+      <div class="tool-desc">Respiratory rate summaries derived from sleep sessions</div>
+    </div>
+    <div class="tool-card" data-cat="sleep">
+      <span class="tool-category tag-amber">Sleep</span>
+      <div class="tool-name">get_daily_sleep_temperature_derivations</div>
+      <div class="tool-desc">Daily sleep temperature derivation data points</div>
+    </div>
+
+    <!-- Nutrition -->
+    <div class="tool-card" data-cat="nutrition">
+      <span class="tool-category" style="background:#f3e8ff;color:#7c3aed;border:none">Nutrition</span>
+      <div class="tool-name">get_hydration</div>
+      <div class="tool-desc">Hydration log entries (fluid intake in milliliters)</div>
+    </div>
+    <div class="tool-card" data-cat="nutrition">
+      <span class="tool-category" style="background:#f3e8ff;color:#7c3aed;border:none">Nutrition</span>
+      <div class="tool-name">get_hydration_daily_rollup</div>
+      <div class="tool-desc">Daily hydration totals aggregated per civil day</div>
+    </div>
+    <div class="tool-card" data-cat="nutrition">
+      <span class="tool-category" style="background:#f3e8ff;color:#7c3aed;border:none">Nutrition</span>
+      <div class="tool-name">get_single_hydration</div>
+      <div class="tool-desc">Single hydration log entry by data point ID</div>
+    </div>
+
+    <!-- Generic -->
+    <div class="tool-card" data-cat="generic">
+      <span class="tool-category" style="background:#f0f0f0;color:#444;border:none">Generic</span>
+      <div class="tool-name">list_data_points</div>
+      <div class="tool-desc">Generic tool — any data type with optional AIP-160 filter expression</div>
+    </div>
+    <div class="tool-card" data-cat="generic">
+      <span class="tool-category" style="background:#f0f0f0;color:#444;border:none">Generic</span>
+      <div class="tool-name">daily_rollup</div>
+      <div class="tool-desc">Daily aggregation for any data type over a date range</div>
+    </div>
+    <div class="tool-card" data-cat="generic">
+      <span class="tool-category" style="background:#f0f0f0;color:#444;border:none">Generic</span>
+      <div class="tool-name">rollup</div>
+      <div class="tool-desc">Aggregate over arbitrary ISO 8601 time range</div>
+    </div>
+    <div class="tool-card" data-cat="generic">
+      <span class="tool-category" style="background:#f0f0f0;color:#444;border:none">Generic</span>
+      <div class="tool-name">reconcile_data_points</div>
+      <div class="tool-desc">Merge data from multiple sources into one consistent stream</div>
+    </div>
+    <div class="tool-card" data-cat="generic">
+      <span class="tool-category" style="background:#f0f0f0;color:#444;border:none">Generic</span>
+      <div class="tool-name">get_user_identity</div>
+      <div class="tool-desc">Authenticated user's unique Google Health identity</div>
+    </div>
+    <div class="tool-card" data-cat="generic">
+      <span class="tool-category" style="background:#f0f0f0;color:#444;border:none">Generic</span>
+      <div class="tool-name">get_user_profile</div>
+      <div class="tool-desc">Basic Google profile info via userinfo endpoint</div>
+    </div>
+
+  </div>
+</section>
+
+<!-- Setup -->
+<section id="setup" style="padding-top:0">
+  <div class="section-header">
+    <span class="section-num">05</span>
+    <h2 class="section-title">Setup &amp; Installation</h2>
+  </div>
+
+  <div class="setup-grid">
+    <div>
+      <p style="color:var(--muted); font-size:13px; margin-bottom:16px">1. Clone the repo and install dependencies</p>
+      <div class="code-wrapper" style="margin-bottom:16px">
+        <div class="code-bar">
+          <div class="code-dots"><span class="dot-r"></span><span class="dot-y"></span><span class="dot-g"></span></div>
+          <span class="code-filename">terminal</span>
+          <span></span>
+        </div>
+        <pre><span class="cm"># Install dependencies</span>
+pip install mcp requests crewai \
+  crewai-tools langchain-groq \
+  python-dotenv uvicorn starlette
+
+<span class="cm"># Or use requirements.txt</span>
+pip install -r requirements.txt</pre>
+      </div>
+
+      <p style="color:var(--muted); font-size:13px; margin-bottom:16px">2. Configure environment variables</p>
+      <div class="code-wrapper">
+        <div class="code-bar">
+          <div class="code-dots"><span class="dot-r"></span><span class="dot-y"></span><span class="dot-g"></span></div>
+          <span class="code-filename">.env</span>
+          <span></span>
+        </div>
+        <pre>GOOGLE_HEALTH_CLIENT_ID=<span class="str">your-client-id</span>
+GOOGLE_HEALTH_CLIENT_SECRET=<span class="str">your-secret</span>
+GOOGLE_HEALTH_REDIRECT_URI=<span class="str">http://localhost</span>
+
+AZURE_API_KEY=<span class="str">your-azure-key</span>
+AZURE_API_BASE=<span class="str">https://your-endpoint.openai.azure.com</span>
+AZURE_API_VERSION=<span class="str">2023-05-15</span></pre>
+      </div>
+    </div>
+
+    <div>
+      <p style="color:var(--muted); font-size:13px; margin-bottom:16px">3. Start the MCP server</p>
+      <div class="code-wrapper" style="margin-bottom:16px">
+        <div class="code-bar">
+          <div class="code-dots"><span class="dot-r"></span><span class="dot-y"></span><span class="dot-g"></span></div>
+          <span class="code-filename">terminal — server</span>
+          <span></span>
+        </div>
+        <pre>python server.py
+<span class="cm"># → Starting on http://127.0.0.1:8000
+# → MCP endpoint: http://127.0.0.1:8000/mcp
+# → Token status: GET /health/token-status</span></pre>
+      </div>
+
+      <p style="color:var(--muted); font-size:13px; margin-bottom:16px">4. Run the CrewAI client</p>
+      <div class="code-wrapper">
+        <div class="code-bar">
+          <div class="code-dots"><span class="dot-r"></span><span class="dot-y"></span><span class="dot-g"></span></div>
+          <span class="code-filename">terminal — client</span>
+          <span></span>
+        </div>
+        <pre>python client.py
+<span class="cm"># If no token: browser opens automatically
+# Paste redirect URL → tokens stored
+# Chat starts immediately
+
+</span>You: <span class="str">Show my step counts for this week</span>
+You: <span class="str">What was my average resting heart rate in May?</span>
+You: <span class="str">Summarise my sleep from last 7 days</span></pre>
+      </div>
+    </div>
+  </div>
+
+  <div style="margin-top:24px; background:var(--surface); border:1px solid var(--border); border-radius:8px; padding:20px 24px">
+    <p style="font-weight:700; font-size:14px; margin-bottom:12px">Google Cloud Console setup</p>
+    <div style="display:flex; flex-direction:column; gap:6px; font-size:13px; color:var(--muted)">
+      <div>1. Create a project at <code>console.cloud.google.com</code></div>
+      <div>2. Enable <strong style="color:var(--ink)">Google Health API</strong> (health.googleapis.com)</div>
+      <div>3. Create OAuth 2.0 credentials </div>
+      <div>4. Add <code>https://www.google.com</code> to Authorized Redirect URIs</div>
+      <div>5. Add test users under OAuth consent screen if app is in testing mode</div>
+    </div>
+  </div>
+</section>
+
+<!-- Footer -->
+<footer>
+  <div class="footer-inner">
+    <div class="footer-logo">google-health-mcp</div>
+    <div class="footer-links">
+      <a href="https://github.com">GitHub</a>
+      <a href="https://health.googleapis.com">Google Health API</a>
+      <a href="https://modelcontextprotocol.io">MCP Docs</a>
+      <a href="https://docs.crewai.com">CrewAI</a>
+    </div>
+    
+  </div>
+</footer>
+
+<script>
+function filterTools(cat) {
+  const cards = document.querySelectorAll('.tool-card');
+  cards.forEach(c => {
+    c.style.display = (cat === 'all' || c.dataset.cat === cat) ? '' : 'none';
+  });
+  // Update button styles
+  document.querySelectorAll('[id^="f-"]').forEach(b => {
+    b.style.background = 'transparent';
+    b.style.border = '1.5px solid var(--border)';
+    b.style.color = 'var(--ink)';
+  });
+  const active = document.getElementById('f-' + cat);
+  if (active) {
+    active.style.background = 'var(--ink)';
+    active.style.border = '1.5px solid var(--ink)';
+    active.style.color = 'white';
+  }
+}
+
+// Intersection observer for scroll animations
+const obs = new IntersectionObserver(entries => {
+  entries.forEach(e => {
+    if (e.isIntersecting) {
+      e.target.style.opacity = '1';
+      e.target.style.transform = 'translateY(0)';
+    }
+  });
+}, { threshold: 0.1 });
+
+document.querySelectorAll('section').forEach(s => {
+  s.style.transition = 'opacity 0.5s ease, transform 0.5s ease';
+  obs.observe(s);
+});
+</script>
+</body>
+</html>
