@@ -1,0 +1,8 @@
+crewai
+crewai-tools
+dotenv
+requests
+mcp
+starlette
+uvicorn
+mcp[cli]
