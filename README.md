@@ -4,9 +4,9 @@
 
 **Model Context Protocol · Streamable HTTP Transport**
 
-| MCP Tools | Health Scopes | Transport |
+| MCP Tools | Health Scopes | Token TTL | Transport |
 |-----------|---------------|-----------|-----------|
-| 40+ | 4 | HTTP |
+| 40+ | 4 | ~3600s | HTTP |
 
 ---
 
